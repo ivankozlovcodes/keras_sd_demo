@@ -24,10 +24,12 @@ const createPanel = (demo) => {
   const xBotActions = {
     material: 'default',
     showSkeleton: false,
+    ik: false,
   };
   xBotFolder.add(xBotActions, 'material', Object.keys(defaultMaterials))
     .onChange(val => xBotModel.setMaterial.call(xBotModel, defaultMaterials[val]));
   xBotFolder.add(xBotActions, 'showSkeleton').onChange((val) => xBotModel.toggleSkeleton(val));
+  xBotFolder.add(xBotActions, 'ik').onChange(val => xBotModel.toggleIk(val));
 }
 
 const main = async () => {
@@ -39,6 +41,7 @@ const main = async () => {
   demo.addModel('xBot', xBot);
 
   demo.animate();
+  xBot.initIk();
 
   createPanel(demo);
 }

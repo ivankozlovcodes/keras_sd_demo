@@ -74,6 +74,9 @@ class Demo {
   animate() {
     requestAnimationFrame(this.animate.bind(this));
     this.stats?.update();
+    for (const model of Object.values(this.models)) {
+      model.update();
+    }
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -84,7 +87,7 @@ class Demo {
   addModel(name, model) {
     this.models[name] = model;
     this.scene.add(model.model);
-    model.bindToScene(this.scene);
+    model.bindToDemo(this);
   }
 
   _initScene() {
