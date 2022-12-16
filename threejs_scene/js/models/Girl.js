@@ -1,14 +1,6 @@
-import {
-  TransformControls
-} from 'three/addons/controls/TransformControls.js';
-import {
-  CCDIKSolver,
-  CCDIKHelper
-} from 'three/addons/animation/CCDIKSolver.js';
-
 import { BaseGltfModel } from './Base.js';
 
-class XbotIkHelper {
+class GirlIkHelper {
   constructor(model) {
     this.model = model;
 
@@ -98,18 +90,16 @@ class XbotIkHelper {
   }
 }
 
-export class XbotModel extends BaseGltfModel {
+export class GirlModel extends BaseGltfModel {
   constructor() {
     super();
-    this.modelPath = 'https://threejs.org/examples/models/gltf/Xbot.glb';
+    this.modelPath = './res/models/Girl_FBX2020/Girl_FBX2020.gltf';
   }
 
   initIk() {
-    this.ikHelper = new XbotIkHelper(this);
-    this.ikHelper.init();
-  }
-
-  toggleIk(enabled = true) {
-    this.ikHelper.toggle(enabled);
+    console.log(this.OOI)
+    this.model.traverse(o => console.log(o.skeleton ? o.name : 'no'))
+    // this.ikHelper = new GirlIkHelper(this);
+    // this.ikHelper.init();
   }
 }

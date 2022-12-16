@@ -4,6 +4,7 @@ import { XbotModel } from './models/XBot.js';
 import {
   GUI
 } from 'three/addons/libs/lil-gui.module.min.js';
+import { GirlModel } from './models/girl.js';
 
 const createPanel = (demo) => {
   const panel = new GUI({
@@ -19,29 +20,29 @@ const createPanel = (demo) => {
     screenshot: demo.takeScreenshot.bind(demo),
   };
   demoFolder.add(demoActions, 'screenshot');
-  const xBotModel = demo.models.xBot;
-  const xBotFolder = panel.addFolder('Xbot Actions');
-  const xBotActions = {
+  const model = demo.models.main;
+  const modelFolder = panel.addFolder('Model Actions');
+  const modelActions = {
     material: 'default',
     showSkeleton: false,
     ik: false,
   };
-  xBotFolder.add(xBotActions, 'material', Object.keys(defaultMaterials))
-    .onChange(val => xBotModel.setMaterial.call(xBotModel, defaultMaterials[val]));
-  xBotFolder.add(xBotActions, 'showSkeleton').onChange((val) => xBotModel.toggleSkeleton(val));
-  xBotFolder.add(xBotActions, 'ik').onChange(val => xBotModel.toggleIk(val));
+  modelFolder.add(modelActions, 'material', Object.keys(defaultMaterials))
+    .onChange(val => model.setMaterial.call(model, defaultMaterials[val]));
+  modelFolder.add(modelActions, 'showSkeleton').onChange((val) => model.toggleSkeleton(val));
+  modelFolder.add(modelActions, 'ik').onChange(val => model.toggleIk(val));
 }
 
 const main = async () => {
   const demo = new Demo(document.getElementById('container'));
-  const xBot = new XbotModel();
+  const model = new XbotModel();
 
-  await xBot.load();
+  await model.load();
   await demo.init();
-  demo.addModel('xBot', xBot);
+  demo.addModel('main', model);
 
   demo.animate();
-  xBot.initIk();
+  model.initIk();
 
   createPanel(demo);
 }
