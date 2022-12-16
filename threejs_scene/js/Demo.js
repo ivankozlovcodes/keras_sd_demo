@@ -1,8 +1,5 @@
 import * as THREE from 'three';
 import {
-  GLTFLoader
-} from 'three/addons/loaders/GLTFLoader.js';
-import {
   OrbitControls
 } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
@@ -13,26 +10,17 @@ class Demo {
   constructor(domElement) {
     this.container = domElement;
 
-    this.model = null;
     this.camera = null;
     this.scene = null;
     this.stats = null;
-    this.skeleton = null;
     this.renderer = null;
+    this.models = {};
 
     this._screenshotCounter = 0;
-
-    this.defaultModelMaterials = {};
-    this.materials = {
-      default: this.defaultModelMaterials,
-      depth_mesh: new THREE.MeshDepthMaterial(),
-    }
   }
 
   async init() {
     this._initScene();
-    await this._loadModel();
-    this._setDefaultModelMaterials();
 
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -52,7 +40,7 @@ class Demo {
     this.orbitControls.enableZoom = true;
     this.orbitControls.target.set(0, 1, 0);
     this.orbitControls.update();
-  
+
     this.stats = new Stats();
     this.container.appendChild(this.stats.dom);
 
@@ -68,13 +56,18 @@ class Demo {
       a.remove();
     };
 
-    this.setModelMaterial();
-    this.render();
-    takeScreenshot(`canvas_mesh_${this._screenshotCounter}`);
-    this.setModelMaterial('depth_mesh');
-    this.render();
-    takeScreenshot(`canvas_dept_hmesh_${this._screenshotCounter}`);
-    this.setModelMaterial();
+    for (const modelName of Object.keys(this.models)) {
+      const model = this.models[modelName];
+      model.toggleSkeleton(false);
+      model.setMaterial();
+      this.render();
+      takeScreenshot(`canvas_mesh_${this._screenshotCounter}`);
+      // TODO: get from a shared material dictionary
+      model.setMaterial(new THREE.MeshDepthMaterial());
+      this.render();
+      takeScreenshot(`canvas_dept_hmesh_${this._screenshotCounter}`);
+      model.setMaterial();
+    }
     this._screenshotCounter += 1;
   }
 
@@ -88,31 +81,10 @@ class Demo {
     this.renderer.render(this.scene, this.camera);
   }
 
-  setModelMaterial(materialName = 'default') {
-    const material = this.materials[materialName];
-    this.model.traverse(obj => {
-      if (obj.isMesh) {
-        obj.material = material instanceof THREE.Material ? material : material[obj.name];
-      }
-    });
-  }
-
-  onMaterialChange(materialName) {
-    this.setModelMaterial(materialName);
-  }
-
-  async _loadModel() {
-    const loader = new GLTFLoader();
-
-    const gltf = await loader.loadAsync(MODEL_PATH);
-    this.model = gltf.scene;
-    this.scene.add(this.model);
-
-    this.model.traverse((object) => object.castShadow = object.isMesh);
-
-    this.skeleton = new THREE.SkeletonHelper(this.model);
-    this.skeleton.visible = false;
-    this.scene.add(this.skeleton);
+  addModel(name, model) {
+    this.models[name] = model;
+    this.scene.add(model.model);
+    model.bindToScene(this.scene);
   }
 
   _initScene() {
@@ -152,12 +124,6 @@ class Demo {
     this.camera.updateProjectionMatrix();
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-  }
-
-  _setDefaultModelMaterials() {
-    this.model.traverse(obj => {
-      if (obj.isMesh) this.defaultModelMaterials[obj.name] = obj.material;
-    });
   }
 }
 
