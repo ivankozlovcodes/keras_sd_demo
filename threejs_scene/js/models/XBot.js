@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import {
   TransformControls
 } from 'three/addons/controls/TransformControls.js';
@@ -7,6 +8,7 @@ import {
 } from 'three/addons/animation/CCDIKSolver.js';
 
 import { BaseGltfModel } from './Base.js';
+import { SkeletonHelper } from '../helpers/skeleton.js';
 
 class XbotIkHelper {
   constructor(model) {
@@ -15,6 +17,29 @@ class XbotIkHelper {
     this.ikSolver = null;
     this.controls = [];
     this.iks = [];
+    const { OOI } = this.model;
+    this.IK_TARGET_INFO = [
+      {
+        targetName: 'leftHandTarget',
+        targetPosition: OOI.mixamorigLeftHand.position.clone().add(new THREE.Vector3(100, 0, 0)),
+        targetParent: OOI.mixamorigSpine,
+      },
+      {
+        targetName: 'rightHandTarget',
+        targetPosition: OOI.mixamorigRightHand.position.clone().add(new THREE.Vector3(-100, 0, 0)),
+        targetParent: OOI.mixamorigSpine,
+      },
+      {
+        targetName: 'leftFootTarget',
+        targetPosition: OOI.mixamorigLeftFoot.position.clone().sub(new THREE.Vector3(-10, 100, 0)),
+        targetParent: OOI.mixamorigSpine,
+      },
+      {
+        targetName: 'rightFootTarget',
+        targetPosition: OOI.mixamorigRightFoot.position.clone().sub(new THREE.Vector3(10, 100, 0)),
+        targetParent: OOI.mixamorigSpine,
+      },
+    ];
   }
 
   get boneIndexLookUp() {
@@ -28,41 +53,46 @@ class XbotIkHelper {
   init() {
     const { OOI } = this.model;
 
-    const leftHandIkBone = OOI.mixamorigLeftHand.clone(false);
-    leftHandIkBone.name = 'leftHandIk';
-    // TODO: come up with a better way
-    leftHandIkBone.position.x = 100; // to straighted the hand
-    OOI.mixamorigSpine.add(leftHandIkBone);
-    OOI.Beta_Joints.skeleton.bones.push(leftHandIkBone);
-    const leftHandIk = {
-      target: this.boneIndexLookUp.leftHandIk,
-      effector: this.boneIndexLookUp.mixamorigLeftHand,
-      links: [
-        { index: this.boneIndexLookUp.mixamorigLeftForeArm },
-        { index: this.boneIndexLookUp.mixamorigLeftArm },
-        { index: this.boneIndexLookUp.mixamorigLeftShoulder },
-      ]
-    };
-
-    const rightHandIkBone = OOI.mixamorigRightHand.clone(false);
-    rightHandIkBone.name = 'rightHandIk';
-    // TODO: come up with a better way
-    rightHandIkBone.position.x = -100; // to straighted the hand
-    OOI.mixamorigSpine.add(rightHandIkBone);
-    OOI.Beta_Joints.skeleton.bones.push(rightHandIkBone);
-    const rightHandIk = {
-      target: this.boneIndexLookUp.rightHandIk,
-      effector: this.boneIndexLookUp.mixamorigRightHand,
-      links: [
-        { index: this.boneIndexLookUp.mixamorigRightForeArm },
-        { index: this.boneIndexLookUp.mixamorigRightArm },
-        { index: this.boneIndexLookUp.mixamorigRightShoulder },
-      ]
-    };
-
-    OOI.Beta_Joints.skeleton.calculateInverses();
-
-    this.iks = [leftHandIk, rightHandIk];
+    for (const { targetName, targetPosition, targetParent } of this.IK_TARGET_INFO) {
+      const bone = SkeletonHelper.createIkTargetBone(targetName, targetPosition);
+      SkeletonHelper.addIkTargetBoneToSkeleton(bone, targetParent, OOI.Beta_Joints.skeleton);
+    }
+    this.iks = [
+      {
+        target: this.boneIndexLookUp.leftHandTarget,
+        effector: this.boneIndexLookUp.mixamorigLeftHand,
+        links: [
+          { index: this.boneIndexLookUp.mixamorigLeftForeArm },
+          { index: this.boneIndexLookUp.mixamorigLeftArm },
+          { index: this.boneIndexLookUp.mixamorigLeftShoulder },
+        ],
+      },
+      {
+        target: this.boneIndexLookUp.rightHandTarget,
+        effector: this.boneIndexLookUp.mixamorigRightHand,
+        links: [
+          { index: this.boneIndexLookUp.mixamorigRightForeArm },
+          { index: this.boneIndexLookUp.mixamorigRightArm },
+          { index: this.boneIndexLookUp.mixamorigRightShoulder },
+        ]
+      },
+      {
+        target: this.boneIndexLookUp.leftFootTarget,
+        effector: this.boneIndexLookUp.mixamorigLeftFoot,
+        links: [
+          { index: this.boneIndexLookUp.mixamorigLeftLeg },
+          { index: this.boneIndexLookUp.mixamorigLeftUpLeg },
+        ]
+      },
+      {
+        target: this.boneIndexLookUp.rightFootTarget,
+        effector: this.boneIndexLookUp.mixamorigRightFoot,
+        links: [
+          { index: this.boneIndexLookUp.mixamorigRightLeg },
+          { index: this.boneIndexLookUp.mixamorigRightUpLeg },
+        ]
+      },
+    ];
     this.ikSolver = new CCDIKSolver(OOI.Beta_Joints, this.iks);
   }
 
@@ -76,10 +106,9 @@ class XbotIkHelper {
     });
     this.controls = [];
     if (enabled) {
-      console.log(this.iks);
-      this.ccdIkHelper = new CCDIKHelper(OOI.Beta_Joints, this.iks, 0.1);
+      this.ccdIkHelper = this.ikSolver.createHelper();
       this.model.scene.add(this.ccdIkHelper)
-      for (const targetBoneName of ['leftHandIk', 'rightHandIk']) {
+      for (const targetBoneName of this.IK_TARGET_INFO.map(o => o.targetName)) {
         const transformControls = this.createControls(OOI[targetBoneName]);
         this.controls.push(transformControls);
         this.model.scene.add(transformControls);

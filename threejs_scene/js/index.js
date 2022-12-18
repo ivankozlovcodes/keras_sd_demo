@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { Demo } from './Demo.js';
-import { XbotModel } from './models/XBot.js';
 import {
   GUI
 } from 'three/addons/libs/lil-gui.module.min.js';
+import { XbotModel } from './models/XBot.js';
 import { GirlModel } from './models/girl.js';
 
 const createPanel = (demo) => {
