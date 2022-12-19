@@ -4,7 +4,6 @@ import {
 } from 'three/addons/controls/TransformControls.js';
 import {
   CCDIKSolver,
-  CCDIKHelper
 } from 'three/addons/animation/CCDIKSolver.js';
 
 import { BaseGltfModel } from './Base.js';
@@ -21,12 +20,12 @@ class XbotIkHelper {
     this.IK_TARGET_INFO = [
       {
         targetName: 'leftHandTarget',
-        targetPosition: OOI.mixamorigLeftHand.position.clone().add(new THREE.Vector3(100, 0, 0)),
+        targetPosition: OOI.mixamorigLeftHand.position.clone().add(new THREE.Vector3(50, 0, 0)),
         targetParent: OOI.mixamorigSpine,
       },
       {
         targetName: 'rightHandTarget',
-        targetPosition: OOI.mixamorigRightHand.position.clone().add(new THREE.Vector3(-100, 0, 0)),
+        targetPosition: OOI.mixamorigRightHand.position.clone().add(new THREE.Vector3(-50, 0, 0)),
         targetParent: OOI.mixamorigSpine,
       },
       {
@@ -57,6 +56,9 @@ class XbotIkHelper {
       const bone = SkeletonHelper.createIkTargetBone(targetName, targetPosition);
       SkeletonHelper.addIkTargetBoneToSkeleton(bone, targetParent, OOI.Beta_Joints.skeleton);
     }
+    const defaultIkParams = {
+      maxAngle: 0.01,
+    }
     this.iks = [
       {
         target: this.boneIndexLookUp.leftHandTarget,
@@ -66,6 +68,7 @@ class XbotIkHelper {
           { index: this.boneIndexLookUp.mixamorigLeftArm },
           { index: this.boneIndexLookUp.mixamorigLeftShoulder },
         ],
+        ...defaultIkParams,
       },
       {
         target: this.boneIndexLookUp.rightHandTarget,
@@ -74,7 +77,8 @@ class XbotIkHelper {
           { index: this.boneIndexLookUp.mixamorigRightForeArm },
           { index: this.boneIndexLookUp.mixamorigRightArm },
           { index: this.boneIndexLookUp.mixamorigRightShoulder },
-        ]
+        ],
+        ...defaultIkParams,
       },
       {
         target: this.boneIndexLookUp.leftFootTarget,
@@ -82,7 +86,8 @@ class XbotIkHelper {
         links: [
           { index: this.boneIndexLookUp.mixamorigLeftLeg },
           { index: this.boneIndexLookUp.mixamorigLeftUpLeg },
-        ]
+        ],
+        ...defaultIkParams,
       },
       {
         target: this.boneIndexLookUp.rightFootTarget,
@@ -90,7 +95,8 @@ class XbotIkHelper {
         links: [
           { index: this.boneIndexLookUp.mixamorigRightLeg },
           { index: this.boneIndexLookUp.mixamorigRightUpLeg },
-        ]
+        ],
+        ...defaultIkParams,
       },
     ];
     this.ikSolver = new CCDIKSolver(OOI.Beta_Joints, this.iks);
