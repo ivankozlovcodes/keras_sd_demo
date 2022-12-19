@@ -124,7 +124,7 @@ class XbotIkHelper {
 
   createControls(targetBone) {
     const transformControls = new TransformControls(this.model.camera, this.model.renderer.domElement);
-    transformControls.size = .35;
+    transformControls.size = .15;
     transformControls.space = 'world';
     transformControls.attach(targetBone);
     transformControls.addEventListener('mouseDown', () => this.model.orbitControls.enabled = false);
@@ -137,6 +137,22 @@ export class XbotModel extends BaseGltfModel {
   constructor() {
     super();
     this.modelPath = 'https://threejs.org/examples/models/gltf/Xbot.glb';
+
+    this.rotateBones = [];
+    this.controls = [];
+  }
+
+  postLoad() {
+    super.postLoad();
+
+    this.rotateBones = [
+      this.OOI.mixamorigLeftArm,
+      this.OOI.mixamorigRightArm,
+      this.OOI.mixamorigLeftForeArm,
+      this.OOI.mixamorigRightForeArm,
+      this.OOI.mixamorigLeftLeg,
+      this.OOI.mixamorigRightLeg,
+    ];
   }
 
   initIk() {
@@ -144,7 +160,26 @@ export class XbotModel extends BaseGltfModel {
     this.ikHelper.init();
   }
 
-  toggleIk(enabled = true) {
+  toggleControls(enabled = true) {
     this.ikHelper.toggle(enabled);
+    if (!enabled) {
+      this.controls.forEach(c => {
+        c.removeFromParent();
+        c.dispose();
+      });
+    } else {
+      this.controls = this.rotateBones
+        .map(bone => {
+          const controls = new TransformControls(this.camera, this.renderer.domElement);
+          controls.size = .15;
+          controls.space = 'world';
+          controls.setMode('rotate');
+          controls.attach(bone);
+          controls.addEventListener('mouseDown', () => this.orbitControls.enabled = false);
+          controls.addEventListener('mouseUp', () => this.orbitControls.enabled = true);
+          this.scene.add(controls);
+          return controls;
+        });
+    }
   }
 }
