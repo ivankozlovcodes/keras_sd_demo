@@ -30,7 +30,7 @@ const createPanel = (demo) => {
   modelFolder.add(modelActions, 'material', Object.keys(defaultMaterials))
     .onChange(val => model.setMaterial.call(model, defaultMaterials[val]));
   modelFolder.add(modelActions, 'showSkeleton').onChange((val) => model.toggleSkeleton(val));
-  modelFolder.add(modelActions, 'ik').onChange(val => model.toggleControls(val));
+  modelFolder.add(modelActions, 'ik').onChange(val => demo.toggleControls(val));
 }
 
 const main = async () => {
@@ -43,6 +43,7 @@ const main = async () => {
 
   demo.animate();
   model.initIk();
+  model.initDrag();
 
   createPanel(demo);
 }

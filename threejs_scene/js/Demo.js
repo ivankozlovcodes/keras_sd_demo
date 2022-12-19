@@ -90,6 +90,10 @@ class Demo {
     model.bindToDemo(this);
   }
 
+  toggleControls(enabled) {
+    Object.values(this.models).forEach(model => model.toggleControls(enabled));
+  }
+
   _initScene() {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0xa0a0a0);
