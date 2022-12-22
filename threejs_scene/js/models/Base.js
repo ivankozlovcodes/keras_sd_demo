@@ -106,4 +106,8 @@ export class BaseGltfModel {
   bindToDemo(demo) {
     this._demo = demo;
   }
+
+  set layer(channel) {
+    this.model.traverse(o => o.layers.set(channel));
+  }
 }

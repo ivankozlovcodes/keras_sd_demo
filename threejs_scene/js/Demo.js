@@ -34,6 +34,7 @@ class Demo {
 
     this.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 100);
     this.camera.position.set(1, 1, 2);
+    this.camera.layers.enableAll();
 
     this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
     this.orbitControls.enablePan = true;
@@ -92,6 +93,16 @@ class Demo {
 
   toggleControls(enabled) {
     Object.values(this.models).forEach(model => model.toggleControls(enabled));
+  }
+
+  toggleLayer(channel) {
+    this.camera.layers.toggle(channel);
+  }
+
+  debug() {
+    console.group('Debug info');
+    Object.values(this.models).forEach(m => console.log(m.OOI));
+    console.groupEnd();
   }
 
   _initScene() {
