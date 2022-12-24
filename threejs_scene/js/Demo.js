@@ -56,6 +56,7 @@ class Demo {
       a.click();
       a.remove();
     };
+    this.toggleControls(false);
 
     for (const modelName of Object.keys(this.models)) {
       const model = this.models[modelName];
