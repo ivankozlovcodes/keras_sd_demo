@@ -9,6 +9,7 @@ import {
 
 import { BaseGltfModel } from './Base.js';
 import { SkeletonHelper } from '../helpers/skeleton.js';
+import { DragHelper } from '../helpers/drag.js';
 
 class XbotIkHelper {
   constructor(model) {
@@ -142,9 +143,7 @@ export class XbotModel extends BaseGltfModel {
     this.rotateBones = [];
     this.controls = [];
 
-    this.boxHelper = null;
-    this.modelDragBox = null;
-    this.dragControls = null;
+    this.dragHelper = null;
   }
 
   postLoad() {
@@ -166,28 +165,14 @@ export class XbotModel extends BaseGltfModel {
   }
 
   initDrag() {
-    this.modelDragBox = new THREE.Mesh(
-      new THREE.BoxGeometry(0.2, 0.2, 0.2),
-      new THREE.MeshBasicMaterial({ transparent: true, opacity: 0 })
-    );
-    this.modelDragBox.geometry.translate(0, 2, 0);
-    this.boxHelper = new THREE.BoxHelper(this.modelDragBox, 0xffff00);
-    this.boxHelper.visible = false;
-    this.scene.add(this.modelDragBox);
-    this.scene.add(this.boxHelper);
-    this.dragControls = new DragControls([this.modelDragBox], this.camera, this.renderer.domElement);
-    this.dragControls.deactivate();
-    this.dragControls.addEventListener('drag', (event) => event.object.position.y = 0);
-    this.dragControls.addEventListener('dragstart', () => this.orbitControls.enabled = false);
-    this.dragControls.addEventListener('dragend', () => this.orbitControls.enabled = true);
+    this.dragHelper = new DragHelper(this);
   }
 
   toggleControls(enabled = true) {
-    this.ikHelper.toggle(enabled);
+    this.ikHelper?.toggle(enabled);
+    this.dragHelper?.toggleControls(enabled);
     if (!enabled) {
       this.controls.forEach(c => c.removeFromParent().dispose());
-      this.boxHelper.visible = false;
-      this.dragControls?.deactivate();
     } else {
       this.controls = this.rotateBones
         .map(bone => {
@@ -201,16 +186,11 @@ export class XbotModel extends BaseGltfModel {
           this.scene.add(controls);
           return controls;
         });
-        this.boxHelper.visible = true;
-        this.dragControls?.activate();
     }
   }
 
   update() {
     super.update();
-    if (this.dragControls?.enabled) {
-      this.boxHelper?.update();
-      this.OOI.Scene.position.copy(this.modelDragBox.position)
-    }
+    this.dragHelper?.update();
   }
 }
