@@ -86,6 +86,9 @@ class Demo {
   }
 
   addModel(name, model) {
+    if (this.models[name]) {
+      throw new Error(`Model with a name ${name} already exists`);
+    }
     this.models[name] = model;
     this.scene.add(model.model);
     model.bindToDemo(this);
