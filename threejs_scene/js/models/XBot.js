@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import {
   TransformControls
 } from 'three/addons/controls/TransformControls.js';
-import { DragControls } from 'three/addons/controls/DragControls.js';
 import {
   CCDIKSolver,
 } from 'three/addons/animation/CCDIKSolver.js';
@@ -31,13 +30,33 @@ class XbotIkHelper {
         targetParent: OOI.mixamorigSpine,
       },
       {
+        targetName: 'leftForeArmTarget',
+        targetPosition: OOI.mixamorigLeftForeArm.position.clone().add(new THREE.Vector3(10, 20, 0)),
+        targetParent: OOI.mixamorigSpine,
+      },
+      {
+        targetName: 'rightForeArmTarget',
+        targetPosition: OOI.mixamorigRightForeArm.position.clone().add(new THREE.Vector3(-10, 20, 0)),
+        targetParent: OOI.mixamorigSpine,
+      },
+      {
         targetName: 'leftFootTarget',
         targetPosition: OOI.mixamorigLeftFoot.position.clone().sub(new THREE.Vector3(-10, 100, 0)),
         targetParent: OOI.mixamorigSpine,
       },
       {
+        targetName: 'leftLegTarget',
+        targetPosition: OOI.mixamorigLeftLeg.position.clone().sub(new THREE.Vector3(-10, 20, 0)),
+        targetParent: OOI.mixamorigSpine,
+      },
+      {
         targetName: 'rightFootTarget',
         targetPosition: OOI.mixamorigRightFoot.position.clone().sub(new THREE.Vector3(10, 100, 0)),
+        targetParent: OOI.mixamorigSpine,
+      },
+      {
+        targetName: 'rightLegTarget',
+        targetPosition: OOI.mixamorigRightLeg.position.clone().sub(new THREE.Vector3(10, 20, 0)),
         targetParent: OOI.mixamorigSpine,
       },
     ];
@@ -59,7 +78,7 @@ class XbotIkHelper {
       SkeletonHelper.addIkTargetBoneToSkeleton(bone, targetParent, OOI.Beta_Joints.skeleton);
     }
     const defaultIkParams = {
-      maxAngle: 0.01,
+      maxAngle: 0.1,
     }
     this.iks = [
       {
@@ -67,8 +86,14 @@ class XbotIkHelper {
         effector: this.boneIndexLookUp.mixamorigLeftHand,
         links: [
           { index: this.boneIndexLookUp.mixamorigLeftForeArm },
+        ],
+        ...defaultIkParams,
+      },
+      {
+        target: this.boneIndexLookUp.leftForeArmTarget,
+        effector: this.boneIndexLookUp.mixamorigLeftForeArm,
+        links: [
           { index: this.boneIndexLookUp.mixamorigLeftArm },
-          { index: this.boneIndexLookUp.mixamorigLeftShoulder },
         ],
         ...defaultIkParams,
       },
@@ -77,8 +102,14 @@ class XbotIkHelper {
         effector: this.boneIndexLookUp.mixamorigRightHand,
         links: [
           { index: this.boneIndexLookUp.mixamorigRightForeArm },
+        ],
+        ...defaultIkParams,
+      },
+      {
+        target: this.boneIndexLookUp.rightForeArmTarget,
+        effector: this.boneIndexLookUp.mixamorigRightForeArm,
+        links: [
           { index: this.boneIndexLookUp.mixamorigRightArm },
-          { index: this.boneIndexLookUp.mixamorigRightShoulder },
         ],
         ...defaultIkParams,
       },
@@ -87,6 +118,13 @@ class XbotIkHelper {
         effector: this.boneIndexLookUp.mixamorigLeftFoot,
         links: [
           { index: this.boneIndexLookUp.mixamorigLeftLeg },
+        ],
+        ...defaultIkParams,
+      },
+      {
+        target: this.boneIndexLookUp.leftLegTarget,
+        effector: this.boneIndexLookUp.mixamorigLeftLeg,
+        links: [
           { index: this.boneIndexLookUp.mixamorigLeftUpLeg },
         ],
         ...defaultIkParams,
@@ -96,6 +134,13 @@ class XbotIkHelper {
         effector: this.boneIndexLookUp.mixamorigRightFoot,
         links: [
           { index: this.boneIndexLookUp.mixamorigRightLeg },
+        ],
+        ...defaultIkParams,
+      },
+      {
+        target: this.boneIndexLookUp.rightLegTarget,
+        effector: this.boneIndexLookUp.mixamorigRightLeg,
+        links: [
           { index: this.boneIndexLookUp.mixamorigRightUpLeg },
         ],
         ...defaultIkParams,
@@ -148,15 +193,6 @@ export class XbotModel extends BaseGltfModel {
 
   postLoad() {
     super.postLoad();
-
-    this.rotateBones = [
-      this.OOI.mixamorigLeftArm,
-      this.OOI.mixamorigRightArm,
-      this.OOI.mixamorigLeftForeArm,
-      this.OOI.mixamorigRightForeArm,
-      this.OOI.mixamorigLeftLeg,
-      this.OOI.mixamorigRightLeg,
-    ];
   }
 
   initIk() {
