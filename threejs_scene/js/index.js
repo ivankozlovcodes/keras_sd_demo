@@ -19,8 +19,6 @@ const createPanel = (demo) => {
   const demoFolder = panel.addFolder('Demo Actions');
   const demoActions = {
     screenshot: demo.takeScreenshot.bind(demo),
-    layer0: demo.toggleLayer.bind(demo, 0),
-    layer1: demo.toggleLayer.bind(demo, 1),
     debug: demo.debug.bind(demo),
   };
   Object.keys(demoActions).forEach(actionName => demoFolder.add(demoActions, actionName));
