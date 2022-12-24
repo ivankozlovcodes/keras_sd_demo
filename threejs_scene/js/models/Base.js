@@ -56,12 +56,28 @@ export class BaseGltfModel {
     return materialsDict;
   }
 
+  initIk() {
+    this.warnNotImplemented(this.initIk.name);
+  }
+
+  initDrag() {
+    this.warnNotImplemented(this.initDrag.name);
+  }
+
   toggleSkeleton(visible = true) {
     this.skeleton?.removeFromParent();
     if (visible) {
       this.skeleton = new THREE.SkeletonHelper(this.model);
       this.scene.add(this.skeleton);
     }
+  }
+
+  toggleControls() {
+    this.warnNotImplemented(this.toggleControls.name);
+  }
+
+  warnNotImplemented(methodName) {
+    console.warn(`${this.constructor.name}.${methodName} is not implemented`);
   }
 
   throwIfNotBinded() {
